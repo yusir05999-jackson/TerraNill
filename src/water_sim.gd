@@ -31,20 +31,23 @@ func _init() -> void:
 
 # ---------- 地形 ----------
 
-## 生成演示地形：中心低、向外抬升的"干旱河谷" + 值噪声起伏，
-## 保证既有坡面可流动，也有洼地可积水（低洼聚积的验收条件）。
+## 生成演示地形：北低南高的单向大坡 + 值噪声起伏 + 预挖几个水潭。
+## 单向坡让水有固定流向（才能冲出河道），水潭保证"低洼聚积"的观感。
 func generate_terrain() -> void:
 	var noise := FastNoiseLite.new()
 	noise.noise_type = FastNoiseLite.TYPE_VALUE
 	noise.frequency = 0.04
 	noise.seed = randi()
-	var center := SIZE * 0.5
 	for y in SIZE:
 		for x in SIZE:
-			var dist := Vector2(x, y).distance_to(Vector2(center, center)) / center
-			var slope := dist * 6.0                                   # 碗状大坡
+			var slope := (float(y) / SIZE) * 8.0                    # 从北到南抬升 8
 			var bump := (noise.get_noise_2d(x, y) + 1.0) * 1.25     # 噪声起伏 0~2.5
 			terrain[y * SIZE + x] = slope + bump
+	# 在中下游挖几个洼地，水汇到此形成湖泊
+	for k in 3:
+		var cx := randi_range(16, SIZE - 16)
+		var cy := randi_range(SIZE / 2, SIZE - 16)
+		dig_disc(cx, cy, randi_range(4, 7), 1.5)
 
 
 func dig_disc(cx: int, cy: int, radius: int, amount: float) -> void:

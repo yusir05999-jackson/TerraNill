@@ -10,8 +10,8 @@ extends RefCounted
 ## 快速开始（Godot 4.x）：
 ##   1. 把 src/ 下两个脚本放入项目
 ##   2. 新建场景，根节点搜索并添加 "WaterView"，按 F6 运行当前场景
-##   3. 建议窗口 768×768：项目设置 → 显示 → 窗口 → 视口宽度/高度
-##   操作：左键注水 | 右键挖渠（降低地形）| Shift+左键抬升地形
+##   3. 建议窗口 1024×1024：项目设置 → 显示 → 窗口 → 视口宽度/高度
+##   操作：按住左键下雨 | 右键挖渠 | Shift+左键抬升地形
 
 const SIZE := 128            # 网格边长（企划书定的 128×128）
 const FLOW_RATE := 0.35      # 流速系数（0~0.5 之间稳定，越大流得越快）
@@ -40,8 +40,8 @@ func generate_terrain() -> void:
 	noise.seed = randi()
 	for y in SIZE:
 		for x in SIZE:
-			var slope := (float(y) / SIZE) * 8.0                    # 从北到南抬升 8
-			var bump := (noise.get_noise_2d(x, y) + 1.0) * 1.25     # 噪声起伏 0~2.5
+			var slope := (float(y) / SIZE) * 9.0                    # 从北到南抬升 9
+			var bump := (noise.get_noise_2d(x, y) + 1.0) * 1.0      # 噪声起伏 0~2
 			terrain[y * SIZE + x] = slope + bump
 	# 在中下游挖几个洼地，水汇到此形成湖泊
 	for k in 3:

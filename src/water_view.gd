@@ -11,12 +11,12 @@ const SIZE := WaterSim.SIZE
 
 var sim := WaterSim.new()
 var terrain_tex: ImageTexture
-var steps_per_frame := 2  # 每帧推进的模拟步数，越大水流越快
+var steps_per_frame := 3  # 每帧推进的模拟步数，越大水流越快
 
 
 func _ready() -> void:
 	sim.generate_terrain()
-	sim.add_water(SIZE / 2, SIZE / 2, 1.5)  # 初始水源：谷心一汪水
+	sim.rain_disc(SIZE / 2, 24, 3, 2.0)  # 初始水源：北部山口一场暴雨
 	_rebuild_terrain_texture()
 	print("操作：左键 注水 | 右键 挖渠 | Shift+左键 抬升地形")
 
@@ -36,7 +36,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					sim.raise_disc(g.x, g.y, 2, 0.5)
 					_rebuild_terrain_texture()
 				else:
-					sim.rain_disc(g.x, g.y, 2, 0.6)
+					sim.rain_disc(g.x, g.y, 3, 1.5)
 			MOUSE_BUTTON_RIGHT:
 				sim.dig_disc(g.x, g.y, 2, 0.5)
 				_rebuild_terrain_texture()
@@ -62,12 +62,12 @@ func _height_color(h: float) -> Color:
 
 func _draw() -> void:
 	draw_texture_rect(terrain_tex, Rect2(Vector2.ZERO, Vector2(SIZE, SIZE) * CELL), false)
-	# 只画有水的地方：水越深越不透明
+	# 只画有水的地方。透明度对深度开平方：薄水膜也清晰可见
 	for y in SIZE:
 		for x in SIZE:
 			var d: float = sim.depth[y * SIZE + x]
-			if d > 0.005:
-				var a := clampf(0.25 + d * 0.35, 0.25, 0.9)
+			if d > 0.01:
+				var a := clampf(0.15 + sqrt(d) * 0.5, 0.15, 0.95)
 				draw_rect(Rect2(Vector2(x, y) * CELL, Vector2(CELL, CELL)),
 					Color(0.15, 0.45, 0.85, a))
 	draw_string(ThemeDB.fallback_font, Vector2(10, 22),
